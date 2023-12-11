@@ -1,0 +1,69 @@
+
+// Developer: Forex Robot Easy Team
+// Site: forexroboteasy.com
+
+// FX Volume MT5 Indicator
+// This indicator provides real-time insights into market sentiment from a broker's point of view.
+
+#property indicator_chart_window
+#property indicator_buffers 1
+#property indicator_color1 clrBlue
+
+// Indicator parameters
+input ENUM_TIMEFRAMES Timeframe = PERIOD_CURRENT;
+input int DisplayOption = 0; // 0 - Show volume, 1 - Show bullish/bearish sentiment
+
+// Indicator buffers
+double VolumeBuffer[];
+
+// Initialization function
+int OnInit()
+{
+    // Set indicator buffers
+    SetIndexBuffer(0, VolumeBuffer, INDICATOR_DATA);
+    
+    // Set indicator label
+    string label = 'FX Volume MT5';
+    IndicatorSetString(INDICATOR_SHORTNAME, label);
+    
+    return(INIT_SUCCEEDED);
+}
+
+// Calculation function
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+{
+    // Calculate volume based on broker's sentiment
+    for(int i = prev_calculated; i < rates_total; i++)
+    {
+        if(DisplayOption == 0)
+        {
+            VolumeBuffer[i] = volume[i];
+        }
+        else if(DisplayOption == 1)
+        {
+            if(close[i] > open[i])
+            {
+                VolumeBuffer[i] = volume[i]; // Bullish sentiment
+            }
+            else if(close[i] < open[i])
+            {
+                VolumeBuffer[i] = -volume[i]; // Bearish sentiment
+            }
+            else
+            {
+                VolumeBuffer[i] = 0; // Neutral sentiment
+            }
+        }
+    }
+    
+    return(rates_total);
+}
